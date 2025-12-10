@@ -2,6 +2,7 @@
   "name": "check-my-process",
   "version": "0.1.0",
   "description": "Enforce software development process standards as code",
+  "type": "module",
   "main": "dist/index.js",
   "bin": {
     "cmp": "dist/index.js"
@@ -53,6 +54,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
     "@eslint/js": "^9.39.1",
+    "@types/iarna__toml": "^2.0.5",
     "@types/node": "^24.10.2",
     "@vitest/coverage-v8": "^4.0.15",
     "eslint": "^9.39.1",
@@ -65,5 +67,10 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.49.0",
     "vitest": "^4.0.15"
+  },
+  "dependencies": {
+    "@iarna/toml": "^2.2.5",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2"
   }
 }
