@@ -183,17 +183,3 @@ check-my-process/
 
 ---
 
-## Future (post v0.1)
-
-Explicitly deferred:
-
-- GitHub Action wrapper
-- Inheritance (import remote standards)
-- Branch protection verification
-- Resolved review threads check
-- SARIF output format
-- Validate ticket exists in Linear API
-- `init` command to generate starter config
-- `validate` command to check config syntax
-- Warn-only mode for gradual rollout
-- Multiple config files / inheritance
