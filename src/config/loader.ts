@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from "fs";
 import { parse } from "@iarna/toml";
 import { Config, DEFAULT_CONFIG } from "./schema.js";
+import { validateConfig } from "./validator.js";
 
 const CONFIG_FILENAME = "cmp.toml";
 
@@ -42,6 +43,9 @@ export function loadConfig(configPath?: string): Config {
     const content = readFileSync(path, "utf-8");
     const parsed = parse(content) as Partial<Config>;
 
+    // Validate against JSON schema (throws ConfigValidationError if invalid)
+    validateConfig(parsed);
+
     // Merge with defaults
     return {
       settings: {
@@ -63,6 +67,10 @@ export function loadConfig(configPath?: string): Config {
     };
   } catch (error) {
     if (error instanceof Error) {
+      // Re-throw validation errors as-is
+      if (error.name === "ConfigValidationError") {
+        throw error;
+      }
       throw new ConfigParseError(error.message);
     }
     throw new ConfigParseError("Unknown error");

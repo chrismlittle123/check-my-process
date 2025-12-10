@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/check-my-process/cmp.schema.json",
+  "title": "check-my-process Configuration",
+  "description": "Configuration schema for check-my-process (cmp.toml)",
+  "type": "object",
+  "properties": {
+    "settings": {
+      "type": "object",
+      "description": "Global settings for check-my-process",
+      "properties": {
+        "default_severity": {
+          "type": "string",
+          "enum": ["error", "warning"],
+          "default": "error",
+          "description": "Default severity level for all checks"
+        }
+      },
+      "required": ["default_severity"],
+      "additionalProperties": false
+    },
+    "pr": {
+      "type": "object",
+      "description": "Pull request size and approval checks",
+      "properties": {
+        "max_files": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 20,
+          "description": "Maximum number of files changed in a PR"
+        },
+        "max_lines": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 400,
+          "description": "Maximum number of lines changed (additions + deletions)"
+        },
+        "min_approvals": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 1,
+          "description": "Minimum number of approvals required"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["error", "warning"],
+          "description": "Severity level for PR checks (overrides default_severity)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "branch": {
+      "type": "object",
+      "description": "Branch naming convention check",
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "format": "regex",
+          "description": "Regex pattern that branch names must match"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["error", "warning"],
+          "description": "Severity level for branch check (overrides default_severity)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ticket": {
+      "type": "object",
+      "description": "Ticket reference check",
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "format": "regex",
+          "description": "Regex pattern for ticket references (e.g., 'LIN-[0-9]+')"
+        },
+        "check_in": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["title", "branch", "body"]
+          },
+          "uniqueItems": true,
+          "minItems": 1,
+          "default": ["title", "branch", "body"],
+          "description": "Where to look for ticket references"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["error", "warning"],
+          "description": "Severity level for ticket check (overrides default_severity)"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["settings"],
+  "additionalProperties": false
+}

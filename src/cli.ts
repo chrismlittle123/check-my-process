@@ -2,7 +2,12 @@ import { Command } from "commander";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { loadConfig, ConfigNotFoundError, ConfigParseError } from "./config/index.js";
+import {
+  loadConfig,
+  ConfigNotFoundError,
+  ConfigParseError,
+  ConfigValidationError,
+} from "./config/index.js";
 import { createGitHubClient } from "./github/index.js";
 import { runChecks } from "./checks/index.js";
 import { formatResults } from "./formatter.js";
@@ -79,6 +84,10 @@ export function createCli(): Command {
           process.exit(1);
         }
       } catch (error) {
+        if (error instanceof ConfigValidationError) {
+          console.error(`Error: ${error.message}`);
+          process.exit(1);
+        }
         if (error instanceof ConfigNotFoundError || error instanceof ConfigParseError) {
           console.error(`Error: ${error.message}`);
           process.exit(1);
@@ -135,6 +144,10 @@ export function createCli(): Command {
           console.log(`  check_in: ${config.ticket.check_in?.join(", ")}`);
         }
       } catch (error) {
+        if (error instanceof ConfigValidationError) {
+          console.error(`✗ ${error.message}`);
+          process.exit(1);
+        }
         if (error instanceof ConfigNotFoundError || error instanceof ConfigParseError) {
           console.error(`✗ ${error.message}`);
           process.exit(1);
