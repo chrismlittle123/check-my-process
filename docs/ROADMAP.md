@@ -49,11 +49,11 @@ check_in = ["title", "branch", "body"]
 
 ```bash
 # Check a PR (token via env var)
-GITHUB_TOKEN=xxx check-my-process --repo owner/repo --pr 123
+GITHUB_TOKEN=xxx cmp check --repo owner/repo --pr 123
 
 # Output formats
-check-my-process --repo owner/repo --pr 123 --format text
-check-my-process --repo owner/repo --pr 123 --format json
+cmp check --repo owner/repo --pr 123 --format text
+cmp check --repo owner/repo --pr 123 --format json
 ```
 
 **Exit codes:**
@@ -115,11 +115,11 @@ Result: 3 passed, 2 failed
 
 | Component | Choice |
 |-----------|--------|
-| Language | Go |
-| CLI | Cobra |
-| Config | BurntSushi/toml |
-| GitHub API | go-github/v57 |
-| Output | lipgloss (text), encoding/json (JSON) |
+| Language | TypeScript |
+| CLI | Commander.js |
+| Config | @iarna/toml |
+| GitHub API | @octokit/rest |
+| Output | chalk (text), JSON.stringify (JSON) |
 
 ---
 
@@ -127,26 +127,29 @@ Result: 3 passed, 2 failed
 
 ```
 check-my-process/
-├── cmd/
-│   └── cmp/
-│       └── main.go
-├── internal/
+├── src/
+│   ├── index.ts            # Entry point
+│   ├── cli.ts              # CLI setup with Commander
 │   ├── config/
-│   │   └── config.go       # TOML loading + structs
+│   │   ├── index.ts        # Config exports
+│   │   ├── loader.ts       # TOML loading
+│   │   └── schema.ts       # Config types
 │   ├── github/
-│   │   └── client.go       # GitHub API wrapper
+│   │   └── client.ts       # GitHub API wrapper
 │   ├── checks/
-│   │   ├── engine.go       # Run all checks, aggregate results
-│   │   ├── pr.go           # PR size checks
-│   │   ├── branch.go       # Branch naming check
-│   │   ├── ticket.go       # Ticket reference check
-│   │   └── approvals.go    # Approval count check
+│   │   ├── index.ts        # Check exports
+│   │   ├── engine.ts       # Run all checks, aggregate results
+│   │   ├── pr-size.ts      # PR size checks
+│   │   ├── branch.ts       # Branch naming check
+│   │   ├── ticket.ts       # Ticket reference check
+│   │   └── approvals.ts    # Approval count check
 │   └── output/
-│       ├── text.go         # Human-readable formatter
-│       └── json.go         # JSON formatter
+│       ├── index.ts        # Output exports
+│       ├── text.ts         # Human-readable formatter
+│       └── json.ts         # JSON formatter
 ├── cmp.toml                # Example config
-├── go.mod
-└── go.sum
+├── package.json
+└── tsconfig.json
 ```
 
 ---
@@ -154,12 +157,12 @@ check-my-process/
 ### Milestones
 
 **M1: Project Setup**
-- [ ] Initialize Go module
-- [ ] Set up Cobra CLI skeleton
-- [ ] Implement config loader
+- [x] Initialize TypeScript project
+- [ ] Set up Commander.js CLI skeleton
+- [ ] Implement TOML config loader
 
 **M2: GitHub Integration**
-- [ ] Implement GitHub client
+- [ ] Implement GitHub client with Octokit
 - [ ] Fetch PR data (files, lines, branch, title, body)
 - [ ] Fetch review/approval data
 
@@ -182,4 +185,3 @@ check-my-process/
 - [ ] Test on check-my-process-playground
 
 ---
-

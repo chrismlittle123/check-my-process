@@ -1,0 +1,17 @@
+# check-my-process configuration
+# See docs/ROADMAP.md for full documentation
+
+[settings]
+default_severity = "error"
+
+[pr]
+max_files = 20
+max_lines = 400
+min_approvals = 1
+
+[branch]
+pattern = "^(feature|fix|hotfix|docs)/v[0-9]+\\.[0-9]+\\.[0-9]+/.+$"
+
+[ticket]
+pattern = "LIN-[0-9]+"
+check_in = ["title", "branch", "body"]
