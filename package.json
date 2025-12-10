@@ -1,0 +1,31 @@
+{
+  "name": "check-my-process",
+  "version": "0.1.0",
+  "description": "Enforce software development process standards as code",
+  "main": "dist/index.js",
+  "bin": {
+    "cmp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrismlittle123/check-my-process.git"
+  },
+  "keywords": ["process", "standards", "github", "pr", "cli"],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chrismlittle123/check-my-process/issues"
+  },
+  "homepage": "https://github.com/chrismlittle123/check-my-process#readme",
+  "devDependencies": {
+    "@types/node": "^24.10.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
