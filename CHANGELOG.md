@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- fd23869: Initial release with CLI skeleton and config loader
+  - Add `cmp check` command (GitHub API integration coming in M2)
+  - Add `cmp validate` command to validate config files
+  - Add `cmp init` command placeholder
+  - Add TOML config loader with schema validation
+  - Support PR rules, branch naming, and ticket reference patterns
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
