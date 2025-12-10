@@ -10,13 +10,40 @@
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/",
+    "test": "vitest",
+    "test:unit": "vitest run",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "knip": "knip",
+    "version": "changeset version",
+    "release": "changeset publish",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/chrismlittle123/check-my-process.git"
   },
-  "keywords": ["process", "standards", "github", "pr", "cli"],
+  "keywords": [
+    "process",
+    "standards",
+    "github",
+    "pr",
+    "cli"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -24,8 +51,19 @@
   },
   "homepage": "https://github.com/chrismlittle123/check-my-process#readme",
   "devDependencies": {
+    "@changesets/cli": "^2.29.8",
+    "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.2",
+    "@vitest/coverage-v8": "^4.0.15",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "knip": "^5.73.0",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.49.0",
+    "vitest": "^4.0.15"
   }
 }

@@ -1,0 +1,43 @@
+#!/bin/sh
+
+echo "🚀 Running pre-push checks..."
+
+# 1. Type-check
+echo "📝 TypeScript type-check..."
+npm run typecheck
+if [ $? -ne 0 ]; then
+  echo "❌ TypeScript type-check failed!"
+  exit 1
+fi
+
+# 2. Lint
+echo "🔍 ESLint..."
+npm run lint
+if [ $? -ne 0 ]; then
+  echo "❌ ESLint failed!"
+  exit 1
+fi
+
+# 3. Build
+echo "🔨 Build..."
+npm run build
+if [ $? -ne 0 ]; then
+  echo "❌ Build failed!"
+  exit 1
+fi
+
+# 4. Unit tests
+echo "🧪 Running unit tests..."
+npm run test:unit
+if [ $? -ne 0 ]; then
+  echo "❌ Unit tests failed!"
+  exit 1
+fi
+
+# 5. Knip - check for unused code (advisory only)
+echo "🔬 Checking for unused code (knip)..."
+if ! npm run knip; then
+  echo "⚠️  Knip reported unused code (non-blocking; please review before merging)"
+fi
+
+echo "✅ All checks passed!"
