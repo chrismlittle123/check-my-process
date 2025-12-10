@@ -182,9 +182,44 @@ check_in = ["title", "branch", "body"]
   });
 
   describe("init command", () => {
-    it("should display init message", () => {
-      const output = execSync("node dist/index.js init", { encoding: "utf-8" });
-      expect(output).toContain("coming");
+    const INIT_TEST_DIR = join(TEST_DIR, "init-test");
+    const CLI_PATH = join(process.cwd(), "dist/index.js");
+
+    beforeAll(() => {
+      mkdirSync(INIT_TEST_DIR, { recursive: true });
+    });
+
+    afterAll(() => {
+      rmSync(INIT_TEST_DIR, { recursive: true, force: true });
+    });
+
+    it("should create cmp.toml file", () => {
+      const output = execSync(`node ${CLI_PATH} init`, {
+        encoding: "utf-8",
+        cwd: INIT_TEST_DIR,
+      });
+      expect(output).toContain("Created cmp.toml");
+    });
+
+    it("should fail if cmp.toml already exists", () => {
+      try {
+        execSync(`node ${CLI_PATH} init`, {
+          encoding: "utf-8",
+          cwd: INIT_TEST_DIR,
+          stdio: "pipe",
+        });
+        expect.fail("Should have thrown");
+      } catch (error) {
+        expect((error as Error).message).toContain("already exists");
+      }
+    });
+
+    it("should overwrite with --force", () => {
+      const output = execSync(`node ${CLI_PATH} init --force`, {
+        encoding: "utf-8",
+        cwd: INIT_TEST_DIR,
+      });
+      expect(output).toContain("Created cmp.toml");
     });
   });
 });
