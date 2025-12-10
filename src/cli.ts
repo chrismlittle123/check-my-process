@@ -1,9 +1,10 @@
 import { Command } from "commander";
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import {
   loadConfig,
+  findConfigPath,
   ConfigNotFoundError,
   ConfigParseError,
   ConfigValidationError,
@@ -31,7 +32,10 @@ export function createCli(): Command {
   program
     .name("cmp")
     .description("Enforce software development process standards as code")
-    .version(getVersion());
+    .version(getVersion())
+    .action(() => {
+      program.help();
+    });
 
   program
     .command("check")
@@ -42,24 +46,34 @@ export function createCli(): Command {
     .option("--config <path>", "Path to config file")
     .action(async (options) => {
       try {
+        // Validate --format option
+        const validFormats = ["text", "json"];
+        if (!validFormats.includes(options.format)) {
+          console.error(`Error: --format must be one of: ${validFormats.join(", ")}`);
+          process.exit(1);
+        }
+
+        // Validate --repo format (must be exactly owner/repo)
+        const repoMatch = options.repo.match(/^([^/]+)\/([^/]+)$/);
+        if (!repoMatch) {
+          console.error("Error: --repo must be in format owner/repo (e.g., facebook/react)");
+          process.exit(1);
+        }
+        const [, owner, repo] = repoMatch;
+
+        // Validate --pr is a positive integer
+        const prNumber = parseInt(options.pr, 10);
+        if (isNaN(prNumber) || prNumber < 1) {
+          console.error("Error: --pr must be a positive integer");
+          process.exit(1);
+        }
+
         const config = loadConfig(options.config);
         const token = process.env.GITHUB_TOKEN;
 
         if (!token) {
           console.error("Error: GITHUB_TOKEN environment variable is required");
           console.error("Set it with: export GITHUB_TOKEN=<your-token>");
-          process.exit(1);
-        }
-
-        const [owner, repo] = options.repo.split("/");
-        if (!owner || !repo) {
-          console.error("Error: --repo must be in format owner/repo");
-          process.exit(1);
-        }
-
-        const prNumber = parseInt(options.pr, 10);
-        if (isNaN(prNumber)) {
-          console.error("Error: --pr must be a number");
           process.exit(1);
         }
 
@@ -114,8 +128,36 @@ export function createCli(): Command {
   program
     .command("init")
     .description("Create a starter cmp.toml config file")
-    .action(() => {
-      console.log("(init command coming in a future release)");
+    .option("--force", "Overwrite existing config file")
+    .action((options) => {
+      const configPath = join(process.cwd(), "cmp.toml");
+
+      if (existsSync(configPath) && !options.force) {
+        console.error("Error: cmp.toml already exists. Use --force to overwrite.");
+        process.exit(1);
+      }
+
+      const template = `# check-my-process configuration
+# See https://github.com/check-my-process for documentation
+
+[settings]
+default_severity = "error"
+
+[pr]
+max_files = 20
+max_lines = 400
+min_approvals = 1
+
+[branch]
+pattern = "^(feature|fix|hotfix)/[A-Z]+-[0-9]+-[a-z0-9-]+$"
+
+[ticket]
+pattern = "[A-Z]+-[0-9]+"
+check_in = ["title", "branch", "body"]
+`;
+
+      writeFileSync(configPath, template);
+      console.log("Created cmp.toml");
     });
 
   program
@@ -124,8 +166,19 @@ export function createCli(): Command {
     .option("--config <path>", "Path to config file")
     .action((options) => {
       try {
+        // Check if a config file exists before loading
+        const explicitPath = options.config;
+        const foundPath = explicitPath ?? findConfigPath();
+
+        if (!foundPath) {
+          console.log("No cmp.toml found. Showing default configuration:");
+          console.log("\nRun 'cmp init' to create a config file.\n");
+        } else {
+          console.log("Config is valid");
+        }
+
         const config = loadConfig(options.config);
-        console.log("✓ Config is valid");
+
         console.log(`\nSettings:`);
         console.log(`  default_severity: ${config.settings.default_severity}`);
         if (config.pr) {
@@ -145,11 +198,11 @@ export function createCli(): Command {
         }
       } catch (error) {
         if (error instanceof ConfigValidationError) {
-          console.error(`✗ ${error.message}`);
+          console.error(`${error.message}`);
           process.exit(1);
         }
         if (error instanceof ConfigNotFoundError || error instanceof ConfigParseError) {
-          console.error(`✗ ${error.message}`);
+          console.error(`${error.message}`);
           process.exit(1);
         }
         throw error;
