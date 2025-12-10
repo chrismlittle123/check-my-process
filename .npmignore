@@ -1,0 +1,43 @@
+# Source files (dist/ is published)
+src/
+tests/
+
+# Config files
+.changeset/
+.github/
+.husky/
+.coderabbit.yaml
+.eslintrc*
+.prettierrc*
+.nvmrc
+eslint.config.mjs
+tsconfig.json
+vitest.config.ts
+vitest.e2e.config.ts
+cmp.toml
+cmc.toml
+
+# Documentation (keep README.md and CHANGELOG.md)
+docs/
+*.md
+!README.md
+!CHANGELOG.md
+
+# Development files
+*.log
+.DS_Store
+coverage/
+node_modules/
+
+# Test files
+*.test.ts
+*.test.js
+*.test.d.ts
+*.test.js.map
+*.test.d.ts.map
+*.spec.ts
+*.spec.js
+*.spec.d.ts
+*.spec.js.map
+*.spec.d.ts.map
+__tests__/
