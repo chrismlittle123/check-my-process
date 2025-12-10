@@ -3,15 +3,17 @@ import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { loadConfig, ConfigNotFoundError, ConfigParseError } from "./config/index.js";
+import { createGitHubClient } from "./github/index.js";
+import { runChecks } from "./checks/index.js";
+import { formatResults } from "./formatter.js";
+import type { OutputFormat } from "./formatter.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 function getVersion(): string {
   try {
-    const packageJson = JSON.parse(
-      readFileSync(join(__dirname, "..", "package.json"), "utf-8")
-    );
+    const packageJson = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
     return packageJson.version;
   } catch {
     return "0.0.0";
@@ -36,21 +38,65 @@ export function createCli(): Command {
     .action(async (options) => {
       try {
         const config = loadConfig(options.config);
+        const token = process.env.GITHUB_TOKEN;
 
-        console.log(`check-my-process v${getVersion()}\n`);
-        console.log(`Checking PR #${options.pr} in ${options.repo}...`);
-        console.log(`Format: ${options.format}`);
-        console.log(`\nConfig loaded:`);
-        console.log(`  - Max files: ${config.pr?.max_files}`);
-        console.log(`  - Max lines: ${config.pr?.max_lines}`);
-        console.log(`  - Min approvals: ${config.pr?.min_approvals}`);
-        console.log(`  - Branch pattern: ${config.branch?.pattern}`);
-        console.log(`  - Ticket pattern: ${config.ticket?.pattern}`);
-        console.log(`\n(GitHub API integration coming in M2)`);
+        if (!token) {
+          console.error("Error: GITHUB_TOKEN environment variable is required");
+          console.error("Set it with: export GITHUB_TOKEN=<your-token>");
+          process.exit(1);
+        }
+
+        const [owner, repo] = options.repo.split("/");
+        if (!owner || !repo) {
+          console.error("Error: --repo must be in format owner/repo");
+          process.exit(1);
+        }
+
+        const prNumber = parseInt(options.pr, 10);
+        if (isNaN(prNumber)) {
+          console.error("Error: --pr must be a number");
+          process.exit(1);
+        }
+
+        const client = createGitHubClient({
+          token,
+          baseUrl: process.env.GITHUB_API_URL,
+        });
+
+        const pr = await client.getPullRequest(owner, repo, prNumber);
+        const summary = runChecks({ pr, config });
+
+        const output = formatResults(summary, {
+          format: options.format as OutputFormat,
+          version: getVersion(),
+          repo: options.repo,
+          prNumber,
+        });
+
+        console.log(output);
+
+        if (summary.hasErrors) {
+          process.exit(1);
+        }
       } catch (error) {
         if (error instanceof ConfigNotFoundError || error instanceof ConfigParseError) {
           console.error(`Error: ${error.message}`);
           process.exit(1);
+        }
+        if (error instanceof Error) {
+          // Handle GitHub API errors
+          if (error.message.includes("Bad credentials")) {
+            console.error("Error: Invalid GitHub token");
+            process.exit(1);
+          }
+          if (error.message.includes("Not Found")) {
+            console.error(`Error: PR #${options.pr} not found in ${options.repo}`);
+            process.exit(1);
+          }
+          if (error.message.includes("rate limit")) {
+            console.error("Error: GitHub API rate limit exceeded");
+            process.exit(1);
+          }
         }
         throw error;
       }
@@ -60,7 +106,7 @@ export function createCli(): Command {
     .command("init")
     .description("Create a starter cmp.toml config file")
     .action(() => {
-      console.log("(init command coming in M5)");
+      console.log("(init command coming in a future release)");
     });
 
   program
