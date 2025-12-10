@@ -62,7 +62,6 @@ Bundle size limits (for frontend)
 API response time thresholds
 Memory leak detection
 
-
 Here are the areas with overlap:
 Linting & Formatting
 

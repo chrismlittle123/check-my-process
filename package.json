@@ -1,6 +1,6 @@
 {
   "name": "check-my-process",
-  "version": "0.2.0",
+  "version": "1.1.0",
   "description": "Enforce software development process standards as code",
   "type": "module",
   "main": "dist/index.js",
@@ -70,6 +70,7 @@
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
+    "@octokit/rest": "^22.0.1",
     "chalk": "^5.6.2",
     "commander": "^14.0.2"
   }
