@@ -21,6 +21,7 @@
     "test:unit:coverage": "vitest run --coverage",
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
     "knip": "knip",
+    "knip:check": "knip --no-exit-code",
     "version": "changeset version",
     "release": "changeset publish",
     "prepare": "husky"
