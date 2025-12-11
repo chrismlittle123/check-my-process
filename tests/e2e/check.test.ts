@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect } from "vitest";
 import { execSync, ExecSyncOptionsWithStringEncoding } from "child_process";
 
 /**
@@ -45,12 +45,6 @@ const execOptions: ExecSyncOptionsWithStringEncoding = {
 };
 
 describe.skipIf(!hasGitHubToken)("check command with real PRs", () => {
-  beforeAll(() => {
-    if (!hasGitHubToken) {
-      console.warn("Skipping real PR tests: GITHUB_TOKEN not set");
-    }
-  });
-
   /**
    * PR #1: All Checks Should Pass (except approvals - needs manual approval)
    *

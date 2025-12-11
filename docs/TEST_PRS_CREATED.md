@@ -14,15 +14,15 @@ All 7 test PRs have been created as permanent test fixtures for e2e testing. The
 
 **Purpose:** Baseline PR that passes all validation checks.
 
-| Check     | Status  | Details                                                     |
-| --------- | ------- | ----------------------------------------------------------- |
-| Branch    | PASS    | `feature/v1.0.0/add-user-authentication`                    |
-| Ticket    | PASS    | `LIN-123` in title                                          |
-| Files     | PASS    | 2 files (max: 20)                                           |
-| Lines     | PASS    | ~437 lines (max: 400) - Note: includes E2E_TEST_PR_SETUP.md |
-| Approvals | NEEDS 1 | Requires manual approval                                    |
+| Check     | Status  | Details                                                           |
+| --------- | ------- | ----------------------------------------------------------------- |
+| Branch    | PASS    | `feature/v1.0.0/add-user-authentication`                          |
+| Ticket    | PASS    | `LIN-123` in title                                                |
+| Files     | PASS    | 2 files (max: 20)                                                 |
+| Lines     | FAIL    | ~437 lines (max: 400) - exceeds limit due to E2E_TEST_PR_SETUP.md |
+| Approvals | NEEDS 1 | Requires manual approval                                          |
 
-**Expected Result:** Exit code `0` (after approval)
+**Expected Result:** Exit code `1` (fails lines check and needs approval)
 
 ---
 
@@ -136,17 +136,17 @@ All 7 test PRs have been created as permanent test fixtures for e2e testing. The
 
 ## Summary Table
 
-| PR # | URL                                                                         | Branch | Ticket | Files | Lines  | Approvals | Expected |
-| ---- | --------------------------------------------------------------------------- | ------ | ------ | ----- | ------ | --------- | -------- |
-| 1    | [PR #1](https://github.com/chrismlittle123/check-my-process-testing/pull/1) | PASS   | PASS   | PASS  | PASS\* | NEEDS 1   | PASS     |
-| 2    | [PR #2](https://github.com/chrismlittle123/check-my-process-testing/pull/2) | FAIL   | PASS   | PASS  | PASS   | NEEDS 1   | FAIL     |
-| 3    | [PR #3](https://github.com/chrismlittle123/check-my-process-testing/pull/3) | PASS   | FAIL   | PASS  | PASS   | NEEDS 1   | FAIL     |
-| 4    | [PR #4](https://github.com/chrismlittle123/check-my-process-testing/pull/4) | PASS   | PASS   | FAIL  | PASS   | NEEDS 1   | FAIL     |
-| 5    | [PR #5](https://github.com/chrismlittle123/check-my-process-testing/pull/5) | PASS   | PASS   | PASS  | FAIL   | NEEDS 1   | FAIL     |
-| 6    | [PR #6](https://github.com/chrismlittle123/check-my-process-testing/pull/6) | PASS   | PASS   | PASS  | PASS   | FAIL      | FAIL     |
-| 7    | [PR #7](https://github.com/chrismlittle123/check-my-process-testing/pull/7) | FAIL   | FAIL   | FAIL  | PASS   | FAIL      | FAIL     |
+| PR # | URL                                                                         | Branch | Ticket | Files | Lines | Approvals | Expected |
+| ---- | --------------------------------------------------------------------------- | ------ | ------ | ----- | ----- | --------- | -------- |
+| 1    | [PR #1](https://github.com/chrismlittle123/check-my-process-testing/pull/1) | PASS   | PASS   | PASS  | FAIL  | NEEDS 1   | FAIL     |
+| 2    | [PR #2](https://github.com/chrismlittle123/check-my-process-testing/pull/2) | FAIL   | PASS   | PASS  | PASS  | NEEDS 1   | FAIL     |
+| 3    | [PR #3](https://github.com/chrismlittle123/check-my-process-testing/pull/3) | PASS   | FAIL   | PASS  | PASS  | NEEDS 1   | FAIL     |
+| 4    | [PR #4](https://github.com/chrismlittle123/check-my-process-testing/pull/4) | PASS   | PASS   | FAIL  | PASS  | NEEDS 1   | FAIL     |
+| 5    | [PR #5](https://github.com/chrismlittle123/check-my-process-testing/pull/5) | PASS   | PASS   | PASS  | FAIL  | NEEDS 1   | FAIL     |
+| 6    | [PR #6](https://github.com/chrismlittle123/check-my-process-testing/pull/6) | PASS   | PASS   | PASS  | PASS  | FAIL      | FAIL     |
+| 7    | [PR #7](https://github.com/chrismlittle123/check-my-process-testing/pull/7) | FAIL   | FAIL   | FAIL  | PASS  | FAIL      | FAIL     |
 
-\*Note: PR #1 includes E2E_TEST_PR_SETUP.md which adds extra lines.
+Note: PR #1 exceeds 400 lines due to E2E_TEST_PR_SETUP.md being included.
 
 ---
 

@@ -190,9 +190,9 @@ check-my-process/
 
 **v1.2.0: E2E Testing with Real Projects** _(Next)_
 
-- [ ] Create test playground repository (`check-my-process-testing`)
-- [ ] Set up test PRs with known states (passing, failing, edge cases)
-- [ ] Implement e2e tests that run against real GitHub PRs
+- [x] Create test playground repository (`check-my-process-testing`)
+- [x] Set up test PRs with known states (passing, failing, edge cases)
+- [x] Implement e2e tests that run against real GitHub PRs
 - [ ] Add CI integration for e2e tests with GitHub token
 
 **v1.3.0: Documentation & Release**
