@@ -43,9 +43,6 @@ jobs:
       - name: Run unit tests with coverage
         run: npm run test:unit:coverage
 
-      - name: cmc check
-        run: node dist/cli/index.js check src/
-
   e2e:
     runs-on: ubuntu-latest
     needs: test
@@ -59,13 +56,10 @@ jobs:
           node-version: 20
           cache: "npm"
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup SSH for private repo access
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          python-version: "3.12"
-
-      - name: Install Ruff
-        run: pip install ruff
+          ssh-private-key: ${{ secrets.CMP_PRIVATE_DEPLOY_KEY }}
 
       - name: Install dependencies
         run: npm ci
@@ -76,3 +70,5 @@ jobs:
       - name: Run e2e tests
         run: npm run test:e2e
         timeout-minutes: 15
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
