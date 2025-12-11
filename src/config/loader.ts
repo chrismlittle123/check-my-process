@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from "fs";
+import { readFileSync, existsSync, statSync } from "fs";
 import { parse } from "@iarna/toml";
 import { Config, DEFAULT_CONFIG } from "./schema.js";
 import { validateConfig } from "./validator.js";
@@ -39,6 +39,19 @@ export function loadConfig(configPath?: string): Config {
     throw new ConfigNotFoundError(path);
   }
 
+  // Check if path is a directory
+  try {
+    const stats = statSync(path);
+    if (stats.isDirectory()) {
+      throw new ConfigParseError(`'${path}' is a directory, not a file`);
+    }
+  } catch (error) {
+    if (error instanceof ConfigParseError) {
+      throw error;
+    }
+    // Ignore other stat errors, let readFileSync handle them
+  }
+
   try {
     const content = readFileSync(path, "utf-8");
     const parsed = parse(content) as Partial<Config>;
@@ -71,7 +84,18 @@ export function loadConfig(configPath?: string): Config {
       if (error.name === "ConfigValidationError") {
         throw error;
       }
-      throw new ConfigParseError(error.message);
+      // Sanitize TOML parse errors to avoid leaking file contents
+      // TOML parse errors often include the problematic line content
+      const message = error.message;
+      // Extract just the error type and position, not the content
+      const positionMatch = message.match(/at row (\d+), col (\d+)/);
+      if (positionMatch) {
+        throw new ConfigParseError(
+          `Invalid TOML syntax at line ${positionMatch[1]}, column ${positionMatch[2]}`
+        );
+      }
+      // For other errors, provide a generic message
+      throw new ConfigParseError("File is not valid TOML format");
     }
     throw new ConfigParseError("Unknown error");
   }
