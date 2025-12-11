@@ -4,19 +4,19 @@
 
 **Goal:** Validate PR process compliance using GitHub API only.
 
-**Target:** Internal team use on `check-my-process-playground` repo.
+**Target:** Internal team use on `check-my-process-testing` repo.
 
 ---
 
 ### Checks
 
-| Check | Description | Data Source |
-|-------|-------------|-------------|
-| PR size (files) | Max files changed in PR | GitHub API |
-| PR size (lines) | Max lines changed (additions + deletions) | GitHub API |
-| Branch naming | Branch name matches regex pattern | GitHub API |
-| Ticket reference | Linear ticket pattern exists in title, body, or branch | GitHub API |
-| Approvals | Minimum number of approvals received | GitHub API |
+| Check            | Description                                            | Data Source |
+| ---------------- | ------------------------------------------------------ | ----------- |
+| PR size (files)  | Max files changed in PR                                | GitHub API  |
+| PR size (lines)  | Max lines changed (additions + deletions)              | GitHub API  |
+| Branch naming    | Branch name matches regex pattern                      | GitHub API  |
+| Ticket reference | Linear ticket pattern exists in title, body, or branch | GitHub API  |
+| Approvals        | Minimum number of approvals received                   | GitHub API  |
 
 ---
 
@@ -57,6 +57,7 @@ cmp check --repo owner/repo --pr 123 --format json
 ```
 
 **Exit codes:**
+
 - `0` — All checks passed (warnings allowed)
 - `1` — One or more errors
 
@@ -65,6 +66,7 @@ cmp check --repo owner/repo --pr 123 --format json
 ### Output
 
 **Text (default):**
+
 ```
 check-my-process v0.1.0
 
@@ -83,6 +85,7 @@ Result: 3 passed, 2 failed
 ```
 
 **JSON:**
+
 ```json
 {
   "version": "0.1.0",
@@ -113,13 +116,13 @@ Result: 3 passed, 2 failed
 
 ### Tech Stack
 
-| Component | Choice |
-|-----------|--------|
-| Language | TypeScript |
-| CLI | Commander.js |
-| Config | @iarna/toml |
-| GitHub API | @octokit/rest |
-| Output | chalk (text), JSON.stringify (JSON) |
+| Component  | Choice                              |
+| ---------- | ----------------------------------- |
+| Language   | TypeScript                          |
+| CLI        | Commander.js                        |
+| Config     | @iarna/toml                         |
+| GitHub API | @octokit/rest                       |
+| Output     | chalk (text), JSON.stringify (JSON) |
 
 ---
 
@@ -156,32 +159,46 @@ check-my-process/
 
 ### Milestones
 
-**M1: Project Setup**
+**v1.0.0: Project Setup**
+
 - [x] Initialize TypeScript project
-- [ ] Set up Commander.js CLI skeleton
-- [ ] Implement TOML config loader
+- [x] Set up Commander.js CLI skeleton
+- [x] Implement TOML config loader
 
-**M2: GitHub Integration**
-- [ ] Implement GitHub client with Octokit
-- [ ] Fetch PR data (files, lines, branch, title, body)
-- [ ] Fetch review/approval data
+**v1.1.0: GitHub Integration**
 
-**M3: Checks**
-- [ ] Implement PR size check (files)
-- [ ] Implement PR size check (lines)
-- [ ] Implement branch naming check
-- [ ] Implement ticket reference check
-- [ ] Implement approvals check
+- [x] Implement GitHub client with Octokit
+- [x] Fetch PR data (files, lines, branch, title, body)
+- [x] Fetch review/approval data
 
-**M4: Output**
-- [ ] Implement text formatter
-- [ ] Implement JSON formatter
-- [ ] Exit code logic (0 on pass, 1 on any error)
+**v1.1.1: Checks**
 
-**M5: Polish**
-- [ ] Error handling for missing config
-- [ ] Error handling for GitHub API failures
+- [x] Implement PR size check (files)
+- [x] Implement PR size check (lines)
+- [x] Implement branch naming check
+- [x] Implement ticket reference check
+- [x] Implement approvals check
+
+**v1.1.2: Output & Polish**
+
+- [x] Implement text formatter
+- [x] Implement JSON formatter
+- [x] Exit code logic (0 on pass, 1 on any error)
+- [x] Error handling for missing config
+- [x] Error handling for GitHub API failures
+- [x] CLI validation and init command
+
+**v1.2.0: E2E Testing with Real Projects** _(Next)_
+
+- [x] Create test playground repository (`check-my-process-testing`)
+- [x] Set up test PRs with known states (passing, failing, edge cases)
+- [x] Implement e2e tests that run against real GitHub PRs
+- [ ] Add CI integration for e2e tests with GitHub token
+
+**v1.3.0: Documentation & Release**
+
 - [ ] README with usage instructions
-- [ ] Test on check-my-process-playground
+- [ ] Test on check-my-process-testing
+- [ ] npm publish setup
 
 ---
