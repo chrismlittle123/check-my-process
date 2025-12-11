@@ -4,13 +4,53 @@
 
 - Always create a feature branch for changes (never commit directly to `main`)
 - Create a PR for review before merging
-- Branch naming must include version: `(feature|fix|hotfix|docs)/vX.Y.Z/description` or `(feature|fix|hotfix|docs)/vX.Y.Z-description`
-  - Examples:
-    - `feature/v1.2.0/add-dark-mode`
-    - `fix/v1.1.2/validation-bug`
-    - `hotfix/v1.1.1-critical-fix`
-    - `docs/v1.2.0/update-readme`
-  - Get current version from `package.json`
+
+### Branch Naming Convention
+
+Branch names **must** follow this pattern:
+
+```
+(feature|fix|hotfix|docs)/vX.Y.Z/description
+```
+
+or
+
+```
+(feature|fix|hotfix|docs)/vX.Y.Z-description
+```
+
+**Allowed prefixes:**
+
+- `feature/` - New features or enhancements
+- `fix/` - Bug fixes
+- `hotfix/` - Critical fixes that need immediate release
+- `docs/` - Documentation changes
+
+**Version format:** `vX.Y.Z` where X, Y, Z are numbers (e.g., `v1.2.0`, `v2.0.1`)
+
+**Examples:**
+
+✅ Valid:
+
+- `feature/v1.2.0/add-dark-mode`
+- `fix/v1.1.2/validation-bug`
+- `hotfix/v1.1.1-critical-fix`
+- `docs/v1.2.0/update-readme`
+- `feature/v2.0.0-new-api`
+
+❌ Invalid:
+
+- `chore/v1.2.0/add-changeset` - `chore` is not an allowed prefix
+- `feature/add-dark-mode` - missing version
+- `v1.5/feature/something` - wrong order
+- `fix/v1.5/bug` - version must be X.Y.Z (three parts)
+
+**How to determine version:**
+
+- Get current version from `package.json`
+- For new features: bump minor (e.g., `1.1.0` → `v1.2.0`)
+- For bug fixes: bump patch (e.g., `1.1.0` → `v1.1.1`)
+- For breaking changes: bump major (e.g., `1.1.0` → `v2.0.0`)
 
 ## Release Process
 

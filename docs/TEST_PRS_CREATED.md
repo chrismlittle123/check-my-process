@@ -4,7 +4,7 @@ Repository: `chrismlittle123/check-my-process-testing`
 
 ## Summary
 
-All 7 test PRs have been created as permanent test fixtures for e2e testing. These PRs should remain **open** and never be merged or closed.
+All 8 test PRs have been created as permanent test fixtures for e2e testing. These PRs should remain **open** and never be merged or closed.
 
 ---
 
@@ -134,6 +134,26 @@ All 7 test PRs have been created as permanent test fixtures for e2e testing. The
 
 ---
 
+## PR #8: All Non-Approval Checks Pass
+
+**URL:** https://github.com/chrismlittle123/check-my-process-testing/pull/8
+
+**Purpose:** PR that passes all checks except approvals (cannot self-approve).
+
+| Check     | Status | Details                                   |
+| --------- | ------ | ----------------------------------------- |
+| Branch    | PASS   | `feature/v1.0.0/LIN-300-passing-pr`       |
+| Ticket    | PASS   | `LIN-300` in title and branch             |
+| Files     | PASS   | 1 file (max: 20)                          |
+| Lines     | PASS   | 8 lines (max: 400)                        |
+| Approvals | FAIL   | 0 approvals (min: 1) - **DO NOT approve** |
+
+**Expected Result:** Exit code `1` (only fails approvals)
+
+**⚠️ Important:** This PR must remain **without approvals** for e2e tests to pass. The tests expect this PR to fail only the approvals check. If an approval is added, the e2e tests will need to be updated to expect exit code `0`.
+
+---
+
 ## Summary Table
 
 | PR # | URL                                                                         | Branch | Ticket | Files | Lines | Approvals | Expected |
@@ -145,8 +165,10 @@ All 7 test PRs have been created as permanent test fixtures for e2e testing. The
 | 5    | [PR #5](https://github.com/chrismlittle123/check-my-process-testing/pull/5) | PASS   | PASS   | PASS  | FAIL  | NEEDS 1   | FAIL     |
 | 6    | [PR #6](https://github.com/chrismlittle123/check-my-process-testing/pull/6) | PASS   | PASS   | PASS  | PASS  | FAIL      | FAIL     |
 | 7    | [PR #7](https://github.com/chrismlittle123/check-my-process-testing/pull/7) | FAIL   | FAIL   | FAIL  | PASS  | FAIL      | FAIL     |
+| 8    | [PR #8](https://github.com/chrismlittle123/check-my-process-testing/pull/8) | PASS   | PASS   | PASS  | PASS  | FAIL      | FAIL     |
 
 Note: PR #1 exceeds 400 lines due to E2E_TEST_PR_SETUP.md being included.
+Note: PR #8 must remain without approvals for e2e tests (see PR #8 section for details).
 
 ---
 
@@ -154,7 +176,9 @@ Note: PR #1 exceeds 400 lines due to E2E_TEST_PR_SETUP.md being included.
 
 1. **PR #1** needs 1 approval to fully pass all checks
 2. **PRs #2-5** need 1 approval each (but will still fail their respective checks)
-3. **PRs #6-7** should NOT receive any approvals (to test approval check failures)
+3. **PRs #6-8** should **NOT** receive any approvals (to test approval check failures)
+
+> **Note:** PR #8 is the "approvals-only failure" fixture. Do not add approvals unless you intend to convert it to a fully passing scenario and update the e2e tests accordingly.
 
 ---
 
