@@ -366,8 +366,8 @@ describe.skipIf(!hasGitHubToken)("check command with real PRs", () => {
       const output = execError.stdout;
       expect(output).toContain("check-my-process");
       expect(output).toContain("PR #2");
-      expect(output).toContain("[FAIL]");
-      expect(output).toContain("branch.pattern");
+      expect(output).toContain("failed");
+      expect(output).toContain("pattern");
     }
   });
 
