@@ -463,8 +463,9 @@ check_in = ["title", "branch", "body"]
    - **Title:** `LIN-300 Add example passing module`
    - **Body:**
 
-     ```
+     ```md
      ## Summary
+
      Adds example passing module for e2e testing.
 
      Ticket: LIN-300
@@ -472,7 +473,9 @@ check_in = ["title", "branch", "body"]
      This PR is designed to pass all validation checks.
      ```
 
-5. **Get 1 approval** (required for PR to fully pass)
+5. **DO NOT add approvals** - Leave PR #8 without approvals while using it as the "approvals-only failure" fixture. The e2e tests expect this PR to fail only the approvals check.
+
+   > **Note:** If you intentionally want to convert PR #8 into a fully passing scenario, add an approval and update the e2e tests accordingly to expect exit code `0`.
 
 ### Validation Checklist
 
@@ -480,7 +483,7 @@ check_in = ["title", "branch", "body"]
 - [x] Ticket reference in title and branch: `LIN-300`
 - [x] Files changed: 1 (max: 20)
 - [x] Lines changed: 8 (max: 400)
-- [ ] Approvals: 0 ❌ (min: 1) - needs manual approval
+- [ ] Approvals: 0 ❌ (min: 1) - **DO NOT approve** (fixture expects failure)
 
 ---
 

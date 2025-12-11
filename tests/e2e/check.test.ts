@@ -454,9 +454,10 @@ describe.skipIf(!hasGitHubToken)("check command with real PRs", () => {
 });
 
 /**
- * E2E tests for error scenarios
+ * E2E tests for CLI argument validation errors
+ * These tests run without GITHUB_TOKEN since they fail before any API call
  */
-describe.skipIf(!hasGitHubToken)("check command error handling", () => {
+describe("check command argument validation", () => {
   /**
    * Test invalid repository format
    */
@@ -472,19 +473,6 @@ describe.skipIf(!hasGitHubToken)("check command error handling", () => {
   });
 
   /**
-   * Test non-existent PR
-   */
-  it("should fail with non-existent PR", () => {
-    try {
-      execSync(`${CLI} check --repo ${TEST_REPO} --pr 99999`, execOptions);
-      expect.fail("Should have exited with error");
-    } catch (error) {
-      const execError = error as { status: number; stderr: string };
-      expect(execError.status).toBe(1);
-    }
-  });
-
-  /**
    * Test missing required options
    */
   it("should fail when --repo is missing", () => {
@@ -494,6 +482,7 @@ describe.skipIf(!hasGitHubToken)("check command error handling", () => {
     } catch (error) {
       const execError = error as { status: number; stderr: string };
       expect(execError.status).toBe(1);
+      expect(execError.stderr).toContain("--repo");
     }
   });
 
@@ -507,6 +496,26 @@ describe.skipIf(!hasGitHubToken)("check command error handling", () => {
     } catch (error) {
       const execError = error as { status: number; stderr: string };
       expect(execError.status).toBe(1);
+      expect(execError.stderr).toContain("--pr");
+    }
+  });
+});
+
+/**
+ * E2E tests for API-level error scenarios (requires GITHUB_TOKEN)
+ */
+describe.skipIf(!hasGitHubToken)("check command API error handling", () => {
+  /**
+   * Test non-existent PR
+   */
+  it("should fail with non-existent PR", () => {
+    try {
+      execSync(`${CLI} check --repo ${TEST_REPO} --pr 99999`, execOptions);
+      expect.fail("Should have exited with error");
+    } catch (error) {
+      const execError = error as { status: number; stderr: string };
+      expect(execError.status).toBe(1);
+      expect(execError.stderr.toLowerCase()).toMatch(/not found|404|error/);
     }
   });
 });
