@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.6
+
+### Patch Changes
+
+- 80ebabd: Fix e2e test expectation to match actual output format
+
 ## 1.2.5
 
 ### Patch Changes
