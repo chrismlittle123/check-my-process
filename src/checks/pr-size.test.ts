@@ -192,3 +192,189 @@ describe("checkMaxLines", () => {
     expect(result.severity).toBe("warning");
   });
 });
+
+describe("PR size edge cases", () => {
+  describe("checkMaxFiles boundary values", () => {
+    it("should pass when PR has 0 files changed", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ filesChanged: 0 }),
+        config: createMockConfig({ pr: { max_files: 20 } }),
+      };
+
+      const result = checkMaxFiles(ctx);
+
+      expect(result.status).toBe("passed");
+      expect(result.actual).toBe(0);
+    });
+
+    it("should pass when PR has exactly 1 file (minimum non-empty PR)", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ filesChanged: 1 }),
+        config: createMockConfig({ pr: { max_files: 1 } }),
+      };
+
+      const result = checkMaxFiles(ctx);
+
+      expect(result.status).toBe("passed");
+      expect(result.actual).toBe(1);
+    });
+
+    it("should fail when 1 file exceeds limit of 0", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ filesChanged: 1 }),
+        config: createMockConfig({ pr: { max_files: 0 } }),
+      };
+
+      const result = checkMaxFiles(ctx);
+
+      // Note: 0 is typically not a useful limit, but the check should handle it
+      expect(result.status).toBe("failed");
+    });
+
+    it("should handle very large file counts", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ filesChanged: 10000 }),
+        config: createMockConfig({ pr: { max_files: 20 } }),
+      };
+
+      const result = checkMaxFiles(ctx);
+
+      expect(result.status).toBe("failed");
+      expect(result.actual).toBe(10000);
+      expect(result.message).toBe("10000 files exceeds limit of 20");
+    });
+
+    it("should pass when files equal very large limit", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ filesChanged: 1000 }),
+        config: createMockConfig({ pr: { max_files: 1000 } }),
+      };
+
+      const result = checkMaxFiles(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should fail when one file over limit", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ filesChanged: 21 }),
+        config: createMockConfig({ pr: { max_files: 20 } }),
+      };
+
+      const result = checkMaxFiles(ctx);
+
+      expect(result.status).toBe("failed");
+      expect(result.actual).toBe(21);
+    });
+  });
+
+  describe("checkMaxLines boundary values", () => {
+    it("should pass when PR has 0 lines changed", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ additions: 0, deletions: 0 }),
+        config: createMockConfig({ pr: { max_lines: 400 } }),
+      };
+
+      const result = checkMaxLines(ctx);
+
+      expect(result.status).toBe("passed");
+      expect(result.actual).toBe(0);
+    });
+
+    it("should pass when PR has only additions (no deletions)", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ additions: 100, deletions: 0 }),
+        config: createMockConfig({ pr: { max_lines: 400 } }),
+      };
+
+      const result = checkMaxLines(ctx);
+
+      expect(result.status).toBe("passed");
+      expect(result.actual).toBe(100);
+    });
+
+    it("should pass when PR has only deletions (no additions)", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ additions: 0, deletions: 200 }),
+        config: createMockConfig({ pr: { max_lines: 400 } }),
+      };
+
+      const result = checkMaxLines(ctx);
+
+      expect(result.status).toBe("passed");
+      expect(result.actual).toBe(200);
+    });
+
+    it("should fail when 1 line exceeds limit of 0", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ additions: 1, deletions: 0 }),
+        config: createMockConfig({ pr: { max_lines: 0 } }),
+      };
+
+      const result = checkMaxLines(ctx);
+
+      expect(result.status).toBe("failed");
+    });
+
+    it("should handle very large line counts", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ additions: 50000, deletions: 50000 }),
+        config: createMockConfig({ pr: { max_lines: 400 } }),
+      };
+
+      const result = checkMaxLines(ctx);
+
+      expect(result.status).toBe("failed");
+      expect(result.actual).toBe(100000);
+      expect(result.message).toBe("100000 lines exceeds limit of 400");
+    });
+
+    it("should fail when one line over limit", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ additions: 201, deletions: 200 }),
+        config: createMockConfig({ pr: { max_lines: 400 } }),
+      };
+
+      const result = checkMaxLines(ctx);
+
+      expect(result.status).toBe("failed");
+      expect(result.actual).toBe(401);
+    });
+
+    it("should pass with exactly 1 addition and 1 deletion under limit", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ additions: 1, deletions: 1 }),
+        config: createMockConfig({ pr: { max_lines: 2 } }),
+      };
+
+      const result = checkMaxLines(ctx);
+
+      expect(result.status).toBe("passed");
+      expect(result.actual).toBe(2);
+    });
+  });
+
+  describe("config edge cases", () => {
+    it("should skip max_files when pr config is undefined", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ filesChanged: 100 }),
+        config: { settings: { default_severity: "error" } },
+      };
+
+      const result = checkMaxFiles(ctx);
+
+      expect(result.status).toBe("skipped");
+    });
+
+    it("should skip max_lines when pr config is undefined", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ additions: 1000, deletions: 1000 }),
+        config: { settings: { default_severity: "error" } },
+      };
+
+      const result = checkMaxLines(ctx);
+
+      expect(result.status).toBe("skipped");
+    });
+  });
+});
