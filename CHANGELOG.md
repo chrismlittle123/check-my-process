@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.2
+
+### Patch Changes
+
+- d823c8d: Minor code comment improvements
+
 ## 1.2.1
 
 ### Patch Changes
