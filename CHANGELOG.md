@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.3
+
+### Patch Changes
+
+- 0696cbc: Fix SSH deploy key secret name (CMC -> CMP)
+- fa11308: Restore SSH key setup in release workflow for private repo access
+
 ## 1.2.2
 
 ### Patch Changes
