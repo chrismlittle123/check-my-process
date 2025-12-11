@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20, 22]
+        node-version: [18, 20, 22]
 
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +26,7 @@ jobs:
       - name: Setup SSH for private repo access
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.CMP_PRIVATE_DEPLOY_KEY }}
+          ssh-private-key: ${{ secrets.CMC_PRIVATE_DEPLOY_KEY }}
 
       - name: Install dependencies
         run: npm ci
@@ -43,8 +43,8 @@ jobs:
       - name: Run unit tests with coverage
         run: npm run test:unit:coverage
 
-      - name: cmp check
-        run: node dist/index.js --help
+      - name: cmc check
+        run: node dist/cli/index.js check src/
 
   e2e:
     runs-on: ubuntu-latest
@@ -58,6 +58,14 @@ jobs:
         with:
           node-version: 20
           cache: "npm"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ruff
+        run: pip install ruff
 
       - name: Install dependencies
         run: npm ci

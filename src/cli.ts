@@ -14,6 +14,7 @@ import { runChecks } from "./checks/index.js";
 import { formatResults } from "./formatter.js";
 import type { OutputFormat } from "./formatter.js";
 
+// Get the directory path for resolving package.json
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
