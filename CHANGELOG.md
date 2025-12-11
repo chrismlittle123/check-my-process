@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.4
+
+### Patch Changes
+
+- e9a142f: Fix CI workflow - remove incorrect cmc check step and Python setup
+
 ## 1.2.3
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "check-my-process",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Enforce software development process standards as code",
   "type": "module",
   "main": "dist/index.js",
