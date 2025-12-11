@@ -30,10 +30,24 @@ const validate = ajv.compile(configSchema);
 export function validateConfig(config: unknown): config is Config {
   const valid = validate(config);
   if (!valid && validate.errors) {
-    const errors: ValidationError[] = validate.errors.map((error: ErrorObject) => ({
-      path: error.instancePath || "/",
-      message: error.message || "Unknown validation error",
-    }));
+    const errors: ValidationError[] = validate.errors.map((error: ErrorObject) => {
+      let message = error.message || "Unknown validation error";
+
+      // Enhance "additionalProperties" errors to include the property name
+      if (
+        error.keyword === "additionalProperties" &&
+        error.params &&
+        "additionalProperty" in error.params
+      ) {
+        const propName = error.params.additionalProperty as string;
+        message = `unknown property '${propName}'`;
+      }
+
+      return {
+        path: error.instancePath || "/",
+        message,
+      };
+    });
     throw new ConfigValidationError(errors);
   }
   return true;

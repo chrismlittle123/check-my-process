@@ -156,8 +156,27 @@ pattern = "[A-Z]+-[0-9]+"
 check_in = ["title", "branch", "body"]
 `;
 
-      writeFileSync(configPath, template);
-      console.log("Created cmp.toml");
+      try {
+        writeFileSync(configPath, template);
+        console.log("Created cmp.toml");
+      } catch (error) {
+        if (error instanceof Error && "code" in error) {
+          const nodeError = error as NodeJS.ErrnoException;
+          if (nodeError.code === "EACCES") {
+            console.error("Error: Permission denied. Cannot write to cmp.toml");
+            process.exit(1);
+          }
+          if (nodeError.code === "ENOENT") {
+            console.error("Error: Directory does not exist");
+            process.exit(1);
+          }
+          if (nodeError.code === "EROFS") {
+            console.error("Error: Read-only file system. Cannot write to cmp.toml");
+            process.exit(1);
+          }
+        }
+        throw error;
+      }
     });
 
   program
@@ -170,14 +189,18 @@ check_in = ["title", "branch", "body"]
         const explicitPath = options.config;
         const foundPath = explicitPath ?? findConfigPath();
 
-        if (!foundPath) {
+        const showDefaultMessage = !foundPath;
+
+        // Load and validate config first (may throw)
+        const config = loadConfig(options.config);
+
+        // Only show success message after validation passes
+        if (showDefaultMessage) {
           console.log("No cmp.toml found. Showing default configuration:");
           console.log("\nRun 'cmp init' to create a config file.\n");
         } else {
           console.log("Config is valid");
         }
-
-        const config = loadConfig(options.config);
 
         console.log(`\nSettings:`);
         console.log(`  default_severity: ${config.settings.default_severity}`);
