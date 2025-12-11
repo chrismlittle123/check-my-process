@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.5
+
+### Patch Changes
+
+- 2f08ab1: Drop Node.js 18 from CI test matrix (coverage requires Node 19+)
+
 ## 1.2.4
 
 ### Patch Changes
