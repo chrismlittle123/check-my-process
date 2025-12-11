@@ -416,6 +416,71 @@ check_in = ["title", "branch", "body"]
 | 5    | ✅     | ✅     | ✅    | ❌    | ✅        | FAIL     |
 | 6    | ✅     | ✅     | ✅    | ✅    | ❌        | FAIL     |
 | 7    | ❌     | ❌     | ❌    | ✅    | ❌        | FAIL     |
+| 8    | ✅     | ✅     | ✅    | ✅    | ❌        | FAIL     |
+
+---
+
+## PR #8: All Non-Approval Checks Pass
+
+**Purpose:** PR that passes all checks except approvals (cannot self-approve).
+
+**Expected Result:** Exit code `1` (only fails approvals). Once approved, exit code `0`.
+
+### Instructions
+
+1. **Create branch:**
+
+   ```bash
+   git checkout main
+   git checkout -b feature/v1.0.0/LIN-300-passing-pr
+   ```
+
+2. **Create a small change:**
+
+   ```bash
+   mkdir -p src/passing
+   cat > src/passing/example.ts << 'EOF'
+   // LIN-300: Example passing module
+   export function greet(name: string): string {
+     return `Hello, ${name}!`;
+   }
+
+   export function add(a: number, b: number): number {
+     return a + b;
+   }
+   EOF
+   ```
+
+3. **Commit and push:**
+
+   ```bash
+   git add .
+   git commit -m "LIN-300 Add example passing module"
+   git push -u origin feature/v1.0.0/LIN-300-passing-pr
+   ```
+
+4. **Create PR with:**
+   - **Title:** `LIN-300 Add example passing module`
+   - **Body:**
+
+     ```
+     ## Summary
+     Adds example passing module for e2e testing.
+
+     Ticket: LIN-300
+
+     This PR is designed to pass all validation checks.
+     ```
+
+5. **Get 1 approval** (required for PR to fully pass)
+
+### Validation Checklist
+
+- [x] Branch matches pattern: `feature/v1.0.0/LIN-300-passing-pr`
+- [x] Ticket reference in title and branch: `LIN-300`
+- [x] Files changed: 1 (max: 20)
+- [x] Lines changed: 8 (max: 400)
+- [ ] Approvals: 0 ❌ (min: 1) - needs manual approval
 
 ---
 

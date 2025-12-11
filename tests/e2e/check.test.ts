@@ -393,4 +393,120 @@ describe.skipIf(!hasGitHubToken)("check command with real PRs", () => {
       expect(Array.isArray(result.results)).toBe(true);
     }
   });
+
+  /**
+   * PR #8: All Checks Pass (except approvals - needs manual approval)
+   *
+   * Branch: feature/v1.0.0/LIN-300-passing-pr ✓
+   * Ticket: LIN-300 in title and branch ✓
+   * Files: 1 (max: 20) ✓
+   * Lines: 8 (max: 400) ✓
+   * Approvals: 0 (min: 1) ✗ - Cannot self-approve
+   *
+   * This PR passes all checks except approvals (which requires manual approval)
+   */
+  it("PR #8: should pass all checks except approvals", () => {
+    try {
+      execSync(`${CLI} check --repo ${TEST_REPO} --pr 8 --format json`, execOptions);
+      expect.fail("Should have exited with code 1");
+    } catch (error) {
+      const execError = error as { status: number; stdout: string };
+      expect(execError.status).toBe(1);
+
+      const result: CheckOutput = JSON.parse(execError.stdout);
+
+      // Only 1 failure (approvals)
+      expect(result.failed).toBe(1);
+
+      // Verify all non-approval checks pass
+      expect(result.results).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            rule: "branch.pattern",
+            status: "passed",
+          }),
+          expect.objectContaining({
+            rule: "ticket.pattern",
+            status: "passed",
+          }),
+          expect.objectContaining({
+            rule: "pr.max_files",
+            status: "passed",
+          }),
+          expect.objectContaining({
+            rule: "pr.max_lines",
+            status: "passed",
+          }),
+        ])
+      );
+
+      // Verify only approvals fails
+      expect(result.results).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            rule: "pr.min_approvals",
+            status: "failed",
+          }),
+        ])
+      );
+    }
+  });
+});
+
+/**
+ * E2E tests for error scenarios
+ */
+describe.skipIf(!hasGitHubToken)("check command error handling", () => {
+  /**
+   * Test invalid repository format
+   */
+  it("should fail with invalid repo format", () => {
+    try {
+      execSync(`${CLI} check --repo invalid-repo --pr 1`, execOptions);
+      expect.fail("Should have exited with error");
+    } catch (error) {
+      const execError = error as { status: number; stderr: string };
+      expect(execError.status).toBe(1);
+      expect(execError.stderr).toContain("owner/repo");
+    }
+  });
+
+  /**
+   * Test non-existent PR
+   */
+  it("should fail with non-existent PR", () => {
+    try {
+      execSync(`${CLI} check --repo ${TEST_REPO} --pr 99999`, execOptions);
+      expect.fail("Should have exited with error");
+    } catch (error) {
+      const execError = error as { status: number; stderr: string };
+      expect(execError.status).toBe(1);
+    }
+  });
+
+  /**
+   * Test missing required options
+   */
+  it("should fail when --repo is missing", () => {
+    try {
+      execSync(`${CLI} check --pr 1`, execOptions);
+      expect.fail("Should have exited with error");
+    } catch (error) {
+      const execError = error as { status: number; stderr: string };
+      expect(execError.status).toBe(1);
+    }
+  });
+
+  /**
+   * Test missing required options
+   */
+  it("should fail when --pr is missing", () => {
+    try {
+      execSync(`${CLI} check --repo ${TEST_REPO}`, execOptions);
+      expect.fail("Should have exited with error");
+    } catch (error) {
+      const execError = error as { status: number; stderr: string };
+      expect(execError.status).toBe(1);
+    }
+  });
 });
