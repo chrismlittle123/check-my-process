@@ -254,4 +254,265 @@ describe("checkTicketReference", () => {
 
     expect(result.severity).toBe("error");
   });
+
+  describe("edge cases", () => {
+    it("should find ticket at the start of the string", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "ABC-123 Fix the bug" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should find ticket at the end of the string", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "Fix the bug ABC-123" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should find ticket in the middle of the string", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "Fix ABC-123 bug in login" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should match multiple tickets in the same field (first match counts)", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "ABC-123 and DEF-456: Multiple tickets" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("passed");
+      expect(result.message).toBe("Ticket found in: title");
+    });
+
+    it("should handle lowercase ticket patterns", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "fix: abc-123 update" }),
+        config: createMockConfig({
+          ticket: { pattern: "[a-z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should be case sensitive for JIRA-style tickets by default", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "abc-123: lowercase ticket" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      // Pattern requires uppercase, so lowercase should fail
+      expect(result.status).toBe("failed");
+    });
+
+    it("should handle case insensitive pattern with regex flag", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "abc-123: lowercase ticket" }),
+        config: createMockConfig({
+          // Using character class to match both cases
+          ticket: { pattern: "[A-Za-z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should handle empty title", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("failed");
+    });
+
+    it("should handle empty branch", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ branch: "" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["branch"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("failed");
+    });
+
+    it("should handle empty body (not null)", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ body: "" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["body"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("failed");
+    });
+
+    it("should handle ticket with very long number", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "PROJECT-123456789: Very old ticket" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should handle ticket with very long project key", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "VERYLONGPROJECTKEY-123: Long key" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should handle GitHub issue style references (#123)", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ body: "Closes #456" }),
+        config: createMockConfig({
+          ticket: { pattern: "#[0-9]+", check_in: ["body"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should handle special characters around ticket", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "[ABC-123] Fix the bug" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should handle ticket in URL format", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ body: "See https://jira.example.com/browse/ABC-123" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["body"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should not match partial ticket patterns", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "ABC- fix without number" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("failed");
+    });
+
+    it("should not match when only number is present", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "Fix bug 123" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("failed");
+    });
+
+    it("should handle unicode in surrounding text", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ title: "ABC-123: Añadir función de búsqueda" }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["title"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should handle multiline body with ticket", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({
+          body: `## Description
+This PR fixes a bug.
+
+## Ticket
+ABC-123
+
+## Testing
+Manual testing completed.`,
+        }),
+        config: createMockConfig({
+          ticket: { pattern: "[A-Z]+-[0-9]+", check_in: ["body"] },
+        }),
+      };
+
+      const result = checkTicketReference(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+  });
 });

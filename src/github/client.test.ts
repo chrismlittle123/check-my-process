@@ -241,4 +241,129 @@ describe("GitHubClient", () => {
       expect(pr.reviewers).toEqual(["reviewer1"]);
     });
   });
+
+  describe("API error handling", () => {
+    it("should throw error for 404 Not Found (non-existent PR)", async () => {
+      const error = new Error("Not Found") as Error & { status: number };
+      error.status = 404;
+      mockGet.mockRejectedValue(error);
+
+      const client = createGitHubClient({ token: "test-token" });
+
+      await expect(client.getPullRequest("owner", "repo", 99999)).rejects.toThrow("Not Found");
+    });
+
+    it("should throw error for 401 Unauthorized (bad token)", async () => {
+      const error = new Error("Bad credentials") as Error & { status: number };
+      error.status = 401;
+      mockGet.mockRejectedValue(error);
+
+      const client = createGitHubClient({ token: "invalid-token" });
+
+      await expect(client.getPullRequest("owner", "repo", 1)).rejects.toThrow("Bad credentials");
+    });
+
+    it("should throw error for 403 Forbidden (no access)", async () => {
+      const error = new Error("Resource not accessible") as Error & { status: number };
+      error.status = 403;
+      mockGet.mockRejectedValue(error);
+
+      const client = createGitHubClient({ token: "test-token" });
+
+      await expect(client.getPullRequest("owner", "private-repo", 1)).rejects.toThrow(
+        "Resource not accessible"
+      );
+    });
+
+    it("should throw error for 403 rate limit exceeded", async () => {
+      const error = new Error("API rate limit exceeded") as Error & { status: number };
+      error.status = 403;
+      mockGet.mockRejectedValue(error);
+
+      const client = createGitHubClient({ token: "test-token" });
+
+      await expect(client.getPullRequest("owner", "repo", 1)).rejects.toThrow(
+        "API rate limit exceeded"
+      );
+    });
+
+    it("should throw error for network failures", async () => {
+      const error = new Error("getaddrinfo ENOTFOUND api.github.com");
+      mockGet.mockRejectedValue(error);
+
+      const client = createGitHubClient({ token: "test-token" });
+
+      await expect(client.getPullRequest("owner", "repo", 1)).rejects.toThrow("ENOTFOUND");
+    });
+
+    it("should throw error for 500 Internal Server Error", async () => {
+      const error = new Error("Internal Server Error") as Error & { status: number };
+      error.status = 500;
+      mockGet.mockRejectedValue(error);
+
+      const client = createGitHubClient({ token: "test-token" });
+
+      await expect(client.getPullRequest("owner", "repo", 1)).rejects.toThrow(
+        "Internal Server Error"
+      );
+    });
+
+    it("should throw error for 502 Bad Gateway", async () => {
+      const error = new Error("Bad Gateway") as Error & { status: number };
+      error.status = 502;
+      mockGet.mockRejectedValue(error);
+
+      const client = createGitHubClient({ token: "test-token" });
+
+      await expect(client.getPullRequest("owner", "repo", 1)).rejects.toThrow("Bad Gateway");
+    });
+
+    it("should throw error for 503 Service Unavailable", async () => {
+      const error = new Error("Service Unavailable") as Error & { status: number };
+      error.status = 503;
+      mockGet.mockRejectedValue(error);
+
+      const client = createGitHubClient({ token: "test-token" });
+
+      await expect(client.getPullRequest("owner", "repo", 1)).rejects.toThrow(
+        "Service Unavailable"
+      );
+    });
+
+    it("should throw error when PR fetch succeeds but reviews fetch fails", async () => {
+      mockGet.mockResolvedValue({
+        data: {
+          number: 123,
+          title: "Test PR",
+          body: "PR body",
+          head: { ref: "feature/test" },
+          base: { ref: "main" },
+          user: { login: "testuser" },
+          changed_files: 5,
+          additions: 100,
+          deletions: 50,
+        },
+      });
+
+      const error = new Error("Failed to fetch reviews") as Error & { status: number };
+      error.status = 500;
+      mockListReviews.mockRejectedValue(error);
+
+      const client = createGitHubClient({ token: "test-token" });
+
+      await expect(client.getPullRequest("owner", "repo", 123)).rejects.toThrow(
+        "Failed to fetch reviews"
+      );
+    });
+
+    it("should throw error for timeout", async () => {
+      const error = new Error("Request timeout");
+      error.name = "TimeoutError";
+      mockGet.mockRejectedValue(error);
+
+      const client = createGitHubClient({ token: "test-token" });
+
+      await expect(client.getPullRequest("owner", "repo", 1)).rejects.toThrow("Request timeout");
+    });
+  });
 });

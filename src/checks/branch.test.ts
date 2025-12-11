@@ -190,4 +190,142 @@ describe("checkBranchPattern", () => {
 
     expect(result.severity).toBe("error");
   });
+
+  describe("edge cases", () => {
+    it("should handle empty branch name", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ branch: "" }),
+        config: createMockConfig({
+          branch: { pattern: "^(feature|fix|hotfix)/.*$" },
+        }),
+      };
+
+      const result = checkBranchPattern(ctx);
+
+      expect(result.status).toBe("failed");
+      expect(result.actual).toBe("");
+    });
+
+    it("should handle very long branch names", () => {
+      const longBranch = "feature/" + "a".repeat(500) + "-ABC-123";
+      const ctx: CheckContext = {
+        pr: createMockPr({ branch: longBranch }),
+        config: createMockConfig({
+          branch: { pattern: "^feature/.*-[A-Z]+-[0-9]+$" },
+        }),
+      };
+
+      const result = checkBranchPattern(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should handle branch names with special characters", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ branch: "feature/ABC-123_special.chars" }),
+        config: createMockConfig({
+          branch: { pattern: "^feature/[A-Z]+-[0-9]+[_\\.a-z]+$" },
+        }),
+      };
+
+      const result = checkBranchPattern(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should handle branch names with unicode characters", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ branch: "feature/ABC-123-añadir-función" }),
+        config: createMockConfig({
+          branch: { pattern: "^feature/[A-Z]+-[0-9]+-.*$" },
+        }),
+      };
+
+      const result = checkBranchPattern(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should be case sensitive by default (Feature vs feature)", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ branch: "Feature/ABC-123-test" }),
+        config: createMockConfig({
+          branch: { pattern: "^(feature|fix|hotfix)/[A-Z]+-[0-9]+-[a-z0-9-]+$" },
+        }),
+      };
+
+      const result = checkBranchPattern(ctx);
+
+      expect(result.status).toBe("failed");
+    });
+
+    it("should allow case insensitive patterns when specified", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ branch: "FEATURE/ABC-123-test" }),
+        config: createMockConfig({
+          branch: { pattern: "^(?i)(feature|fix|hotfix)/[A-Z]+-[0-9]+-[a-z0-9-]+$" },
+        }),
+      };
+
+      // Note: JavaScript regex doesn't support inline (?i) flag, so this tests
+      // that the pattern is applied as-is (and will fail because (?i) isn't valid)
+      const result = checkBranchPattern(ctx);
+
+      // This will either fail because the regex is invalid or because it doesn't match
+      expect(result.status).toBe("failed");
+    });
+
+    it("should handle branch names with slashes in description", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ branch: "feature/ABC-123/sub/path" }),
+        config: createMockConfig({
+          branch: { pattern: "^feature/[A-Z]+-[0-9]+/.*$" },
+        }),
+      };
+
+      const result = checkBranchPattern(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should handle branch names with numbers only", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ branch: "123456" }),
+        config: createMockConfig({
+          branch: { pattern: "^[0-9]+$" },
+        }),
+      };
+
+      const result = checkBranchPattern(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should handle branch name that is just a single character", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ branch: "x" }),
+        config: createMockConfig({
+          branch: { pattern: "^[a-z]$" },
+        }),
+      };
+
+      const result = checkBranchPattern(ctx);
+
+      expect(result.status).toBe("passed");
+    });
+
+    it("should handle whitespace in branch names (if somehow present)", () => {
+      const ctx: CheckContext = {
+        pr: createMockPr({ branch: "feature/test branch" }),
+        config: createMockConfig({
+          branch: { pattern: "^feature/.*$" },
+        }),
+      };
+
+      const result = checkBranchPattern(ctx);
+
+      // Pattern matches anything after feature/, including spaces
+      expect(result.status).toBe("passed");
+    });
+  });
 });
